@@ -320,31 +320,9 @@ export default function ProjectCaseStudyPage() {
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.6, delay: 0.25 }}
         >
-          <div className="text-center mb-6">
-            <h2 className="text-xl md:text-2xl font-semibold text-green-300">
-              عملاؤنا
-            </h2>
-          </div>
+       
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 md:gap-6">
-            {[
-              "Saudi Fashion Co",
-              "Riyadh Restaurant Group",
-              "Elite Medical Clinic",
-              "Gulf E-commerce",
-              "Najd Coffee",
-              "Smart Health Center",
-            ].map((name) => (
-              <div
-                key={name}
-                className="flex items-center justify-center px-4 py-3 md:px-6 md:py-4 rounded-2xl bg-[#050c09] border border-emerald-500/20 shadow-md grayscale hover:grayscale-0 hover:scale-105 hover:border-emerald-400/70 hover:shadow-[0_0_28px_rgba(16,185,129,0.55)] transition-all duration-300 ease-out"
-              >
-                <span className="text-[11px] sm:text-xs md:text-sm font-medium tracking-wide text-gray-300 text-center">
-                  {name}
-                </span>
-              </div>
-            ))}
-          </div>
+          
         </motion.section>
       </div>
     </main>
