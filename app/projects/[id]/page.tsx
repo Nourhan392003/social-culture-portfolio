@@ -5,6 +5,14 @@ import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 
+type Client = {
+  id: number;
+  client_name: string;
+  client_logo?: string;
+  website_url?: string;
+  project_id: number;
+};
+
 type Project = {
   id: number;
   title: string;
@@ -24,6 +32,7 @@ export default function ProjectCaseStudyPage() {
   const router = useRouter();
 
   const [project, setProject] = useState<Project | null>(null);
+  const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -32,16 +41,25 @@ export default function ProjectCaseStudyPage() {
 
       setLoading(true);
 
-      const { data, error } = await supabase
+      // Fetch project
+      const { data: projectData, error: projectError } = await supabase
         .from("projects")
         .select("*")
         .eq("id", Number(params.id))
         .single();
 
-      if (!error && data) {
-        setProject(data as Project);
-      } else {
-        setProject(null);
+      if (!projectError && projectData) {
+        setProject(projectData as Project);
+      }
+
+      // Fetch dynamic clients
+      const { data: clientsData, error: clientsError } = await supabase
+        .from("clients")
+        .select("*")
+        .eq("project_id", Number(params.id));
+
+      if (!clientsError && clientsData) {
+        setClients(clientsData as Client[]);
       }
 
       setLoading(false);
@@ -72,12 +90,15 @@ export default function ProjectCaseStudyPage() {
         >
           الرجوع إلى المشاريع
         </button>
+        
       </main>
     );
   }
+ 
 
   return (
     <main className="min-h-screen bg-black text-gray-200">
+
       {/* Hero */}
       <section className="relative h-96 w-full overflow-hidden">
         {project.image_url && (
@@ -132,9 +153,9 @@ export default function ProjectCaseStudyPage() {
             </motion.div>
           </div>
         </div>
+         
       </section>
-
-      {/* Content */}
+      
       <div className="max-w-5xl mx-auto px-6 py-14 space-y-12">
         {/* Overview */}
         <motion.section
@@ -154,7 +175,7 @@ export default function ProjectCaseStudyPage() {
           </p>
         </motion.section>
 
-        {/* Challenge */}
+    {/* Challenge */}
         <motion.section
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -313,17 +334,74 @@ export default function ProjectCaseStudyPage() {
             </div>
           </div>
         </motion.section>
+{/* Client Logos */}
+{clients.length > 0 && (
+  <motion.section
+    initial={{ opacity: 0, y: 40 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true, margin: "-100px" }}
+    transition={{ duration: 0.8, ease: "easeOut" }}
+    className="relative pt-20 pb-10"
+  >
+    {/* Background glow */}
+    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-green-500/5 rounded-full blur-[120px] -z-10" />
 
-        <motion.section
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.6, delay: 0.25 }}
+    <div className="text-center mb-16">
+      <h2 className="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-500 mb-4">
+        عملاؤنا
+      </h2>
+      <p className="text-gray-400 text-sm md:text-base max-w-lg mx-auto">
+        شركات رائدة وثقت في قدرتنا على صناعة الفارق الرقمي
+      </p>
+    </div>
+
+    <motion.div
+      initial="hidden"
+      whileInView="show"
+      viewport={{ once: true }}
+      variants={{
+        hidden: { opacity: 0 },
+        show: {
+          opacity: 1,
+          transition: { staggerChildren: 0.1 },
+        },
+      }}
+      className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 md:gap-8"
+    >
+      {clients.map((client) => (
+        <motion.div
+          key={client.id}
+          variants={{
+            hidden: { opacity: 0, scale: 0.9, y: 20 },
+            show: { opacity: 1, scale: 1, y: 0 },
+          }}
+          whileHover={{ y: -8, scale: 1.05 }}
+          className="relative flex items-center justify-center p-8 rounded-2xl bg-white/[0.03] backdrop-blur-md border border-white/10 hover:border-green-500/40 transition-all duration-500 group cursor-pointer overflow-hidden shadow-xl"
+          onClick={() =>
+            client.website_url &&
+            window.open(client.website_url, "_blank", "noopener,noreferrer")
+          }
         >
-       
+          {/* Hover gradient */}
+          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-br from-green-500/10 via-transparent to-emerald-500/10 pointer-events-none" />
 
-          
-        </motion.section>
+          {client.client_logo ? (
+            <img
+              src={client.client_logo}
+              alt={client.client_name}
+              className="max-h-14 w-auto object-contain transition-all duration-500 grayscale group-hover:grayscale-0 group-hover:brightness-110"
+            />
+          ) : (
+            <span className="text-xs md:text-sm font-bold text-gray-500 group-hover:text-green-400 transition-all duration-500 text-center uppercase tracking-widest leading-tight">
+              {client.client_name}
+            </span>
+          )}
+        </motion.div>
+      ))}
+    </motion.div>
+ </motion.section>
+)}
+
       </div>
     </main>
   );

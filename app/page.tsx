@@ -72,13 +72,26 @@ export default function Home() {
   const [services, setServices] = useState<Service[]>([]);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"services" | "projects">("services");
+const [activeTab, setActiveTab] = useState<"services" | "projects" | "packages">("packages");
   const [showServiceModal, setShowServiceModal] = useState(false);
   const [showProjectModal, setShowProjectModal] = useState(false);
   const projectsTrackRef = useRef<HTMLDivElement | null>(null);
   const [projectsDragWidth, setProjectsDragWidth] = useState(0);
   const [projectsOffset, setProjectsOffset] = useState(0);
 const [sent, setSent] = useState(false);
+const [clients, setClients] = useState<any[]>([]);
+const [editingClient, setEditingClient] = useState<any>(null);
+const [name, setName] = useState("");
+const [logo, setLogo] = useState("");
+  /* ===== الباقات State ===== */
+const [packages, setPackages] = useState<any[]>([]);
+const [editingPackage, setEditingPackage] = useState<any>(null);
+const [pkgOriginalPrice, setPkgOriginalPrice] = useState("");
+const [pkgTitle, setPkgTitle] = useState("");
+const [pkgDuration, setPkgDuration] = useState("");
+const [pkgPrice, setPkgPrice] = useState("");
+const [pkgFeatures, setPkgFeatures] = useState("");
+
   /* ===== Project State ===== */
  const [newProjectTitle, setNewProjectTitle] = useState("");
   const [newProjectDesc, setNewProjectDesc] = useState("");
@@ -132,41 +145,33 @@ const [newProjectDuration, setNewProjectDuration] = useState("خلال 6 أشه�
     setServices(servicesData ?? []);
     setLoading(false);
   }
+const loadClients = async () => {
+  const { data, error } = await supabase
+    .from("clients")
+    .select("id, name, logo_url");
+
+  if (!error && data) {
+    setClients(data);
+  }
+};
+const loadPackages = async () => {
+  const { data } = await supabase.from("packages").select("*");
+
+  if (data) setPackages(data);
+};
+ const getSession = async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  setUser(session?.user ?? null);
+  fetchData();
+};
 
   /* ================= Init ================= */
 
  useEffect(() => {
-  const getSession = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    setUser(session?.user ?? null);
-    fetchData();
-  };
-
+  loadClients();
+  loadPackages();
   getSession();
-
-  const { data: authListener } = supabase.auth.onAuthStateChange(
-    (_event, session) => {
-      setUser(session?.user ?? null);
-    }
-  );
-
-  return () => {
-    authListener.subscription.unsubscribe();
-  };
 }, []);
-
-useEffect(() => {
-  const { data: listener } = supabase.auth.onAuthStateChange(
-    (_event, session) => {
-      setUser(session?.user ?? null);
-    }
-  );
-
-  return () => {
-    listener.subscription.unsubscribe();
-  };
-}, []);
-
 
   useEffect(() => {
     const track = projectsTrackRef.current;
@@ -336,9 +341,86 @@ useEffect(() => {
     await supabase.auth.signOut();
     window.location.reload();
   };
+const deleteClient = async (id: number) => {
+  await supabase.from("clients").delete().eq("id", id);
+  loadClients();
+};
 
+const openEdit = (client: any) => {
+  setEditingClient(client);
+  setName(client.name || "");
+  setLogo(client.logo_url || "");
+};
+
+const updateClient = async () => {
+  if (!editingClient) return;
+
+  await supabase
+    .from("clients")
+    .update({
+      name,
+      logo_url: logo,
+    })
+    .eq("id", editingClient.id);
+
+  setEditingClient(null);
+  loadClients();
+};
   if (loading) return <div className="text-white p-10">Loading...</div>;
+  const addClient = async () => {
+  await supabase.from("clients").insert({
+    name,
+    logo_url: logo,
+  });
 
+  setEditingClient(null);
+  setName("");
+  setLogo("");
+  loadClients();
+};
+const addPackage = async () => {
+await supabase.from("packages").insert([
+  {
+    title: pkgTitle,
+    duration: pkgDuration,
+    price: pkgPrice,
+    original_price: pkgOriginalPrice,
+    features: pkgFeatures.split("\n"),
+  },
+]);
+
+  resetPackage();
+  loadPackages();
+};
+
+const updatePackage = async () => {
+  await supabase
+    .from("packages")
+    .update({
+      title: pkgTitle,
+      duration: pkgDuration,
+      price: pkgPrice,
+      features: pkgFeatures.split("\n"),
+    })
+    .eq("id", editingPackage.id);
+
+  resetPackage();
+  loadPackages();
+};
+{/*packages*/}
+
+const deletePackage = async (id: number) => {
+  await supabase.from("packages").delete().eq("id", id);
+  loadPackages();
+};
+
+const resetPackage = () => {
+  setEditingPackage(null);
+  setPkgTitle("");
+  setPkgDuration("");
+  setPkgPrice("");
+  setPkgFeatures("");
+};
   return (
     <main className="bg-black text-white min-h-screen p-10">
       <Toaster position="top-right" />
@@ -417,38 +499,51 @@ useEffect(() => {
       {/* Services */}
       <section className="mt-24">
         {/* ===== Tabs Header ===== */}
-        <div className="flex justify-center mb-12">
-          <div className="bg-[#0c1f17] p-2 rounded-full flex gap-2">
-            <button
-              onClick={() => setActiveTab("services")}
-              className={`px-6 py-2 rounded-full font-bold transition ${
-                activeTab === "services"
-                  ? "bg-green-500 text-black"
-                  : "text-green-400 hover:bg-green-500/10"
-              }`}
-            >
-              خدماتنا
-            </button>
-            <button
-              onClick={() => setActiveTab("projects")}
-              className={`px-6 py-2 rounded-full font-bold transition ${
-                activeTab === "projects"
-                  ? "bg-green-500 text-black"
-                  : "text-green-400 hover:bg-green-500/10"
-              }`}
-            >
-              مشاريعنا
-            </button>
-          </div>
-        </div>
+       <div className="bg-[#0c1f17] p-2 rounded-full flex gap-2">
 
+  <button
+    onClick={() => setActiveTab("services")}
+    className={`px-6 py-2 rounded-full font-bold transition ${
+      activeTab === "services"
+        ? "bg-green-500 text-black"
+        : "text-green-400 hover:bg-green-500/10"
+    }`}
+  >
+    خدماتنا
+  </button>
+
+  <button
+    onClick={() => setActiveTab("projects")}
+    className={`px-6 py-2 rounded-full font-bold transition ${
+      activeTab === "projects"
+        ? "bg-green-500 text-black"
+        : "text-green-400 hover:bg-green-500/10"
+    }`}
+  >
+    مشاريعنا
+  </button>
+
+  {/* 🔥 الجديد */}
+  <button
+    onClick={() => setActiveTab("packages")}
+    className={`px-6 py-2 rounded-full font-bold transition ${
+      activeTab === "packages"
+        ? "bg-green-500 text-black"
+        : "text-green-400 hover:bg-green-500/10"
+    }`}
+  >
+    باقاتنا
+  </button>
+
+</div>
         {/* ===== Tab Content ===== */}
-        <motion.div
-          key={activeTab}
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-        >
+       <motion.div
+  key={activeTab}
+  initial={{ opacity: 0, y: 40, scale: 0.98 }}
+  animate={{ opacity: 1, y: 0, scale: 1 }}
+  exit={{ opacity: 0 }}
+  transition={{ duration: 0.5, ease: "easeOut" }}
+>
           {/* ================= Services ================= */}
           {activeTab === "services" && (
             <div>
@@ -658,11 +753,127 @@ ${
 </div>
               </div>
           )}
-          </motion.div>
-        
-)
+          {/*packages*/}
+{activeTab === "packages" && (
+  <div>
+
+    {user && (
+      <div className="flex justify-between items-center mb-8">
+        <h2 className="text-3xl font-bold text-green-400">
+          باقاتنا
+        </h2>
+
+        <button
+          onClick={() => setEditingPackage({})}
+          className="bg-green-500 text-black px-6 py-2 rounded-xl font-bold hover:scale-105 transition"
+        >
+          + إضافة باقة
+        </button>
+      </div>
+    )}
+
+    {/* Grid / Scroll Container */}
+ {/* Grid / Scroll Container */}
+<div className="flex md:grid md:grid-cols-3 gap-6 overflow-x-auto md:overflow-visible pb-4">
+
+  {packages.map((pkg, index) => {
+    const isMiddle = index === 1;
+
+    return (
+      <div
+        key={pkg.id}
+        className={`relative bg-[#0c1f17] rounded-3xl p-6 border border-green-500/20 shadow-xl transition duration-500 min-w-[280px] md:min-w-0
+        ${isMiddle ? "md:scale-110 border-yellow-400 z-10" : "hover:scale-105"}
+        `}
+      >
+
+        {isMiddle && (
+          <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-yellow-400 text-black text-xs font-bold px-4 py-1 rounded-full">
+            الأكثر طلباً ⭐
+          </span>
+        )}
+
+        <h3 className="text-xl font-bold text-green-400 mb-2">
+          {pkg.duration}
+        </h3>
+
+        <div className="mb-4">
+         <p className="text-gray-500 line-through text-lg">
+  {pkg.original_price} ريال
+</p>
+
+          <p className="text-3xl font-bold text-yellow-400">
+            {pkg.price} ريال
+          </p>
+
+          <span className="text-xs bg-red-600 px-3 py-1 rounded-full font-bold">
+            عرض العيد 🎉
+          </span>
+        </div>
+
+        <ul className="space-y-2 text-gray-300 text-sm">
+          {(pkg.features || []).map((f: string, i: number) => (
+            <li key={i}>• {f}</li>
+          ))}
+        </ul>
+
+      </div>
+    );
+  })}
+</div>
+</div>
+)}
+        </motion.div>
       </section>
 
+     {/* Client Logos */}
+<section className="py-24 bg-black overflow-hidden">
+  <div className="max-w-6xl mx-auto px-6 mb-16 text-center">
+    <h2 className="text-3xl md:text-4xl font-bold text-green-400 mb-4">
+      عملاؤنا
+    </h2>
+    <p className="text-gray-500">
+      نعتز بثقة شركائنا في مختلف القطاعات
+    </p>
+  </div>
+
+  <div className="relative w-full overflow-hidden group">
+
+    {/* Fade edges */}
+    <div className="absolute left-0 top-0 w-40 h-full bg-gradient-to-r from-black via-black/80 to-transparent z-10 pointer-events-none" />
+    <div className="absolute right-0 top-0 w-40 h-full bg-gradient-to-l from-black via-black/80 to-transparent z-10 pointer-events-none" />
+
+    <motion.div
+      className="flex gap-16 md:gap-24"
+      animate={{ x: ["0%", "-50%"] }}
+      transition={{
+        repeat: Infinity,
+        duration: Math.max(20, clients.length * 5),
+        ease: "linear",
+      }}
+      whileHover={{ animationPlayState: "paused" }}
+    >
+      {[...clients, ...clients].map((client, index) => (
+        <div
+          key={index}
+          className="flex flex-col items-center justify-center min-w-[140px] md:min-w-[180px] transition duration-300"
+        >
+          {client.logo_url ? (
+            <img
+              src={client.logo_url}
+              alt={client.name}
+              className="max-h-10 md:max-h-12 object-contain grayscale opacity-70 hover:grayscale-0 hover:opacity-100 transition duration-300"
+            />
+          ) : (
+            <span className="text-gray-500 text-sm md:text-base">
+              {client.name}
+            </span>
+          )}
+        </div>
+      ))}
+    </motion.div>
+  </div>
+</section>
 
       {/* Add Service Modal */}
       {user && activeTab === "services" && showServiceModal && (
@@ -723,7 +934,69 @@ ${
           </div>
         </div>
       )}
+{/*packages*/}
+<section className="py-24 bg-black text-white">
+  <div className="max-w-7xl mx-auto px-6">
 
+    <h2 className="text-4xl text-green-400 text-center mb-16">
+      باقاتنا
+    </h2>
+
+    {user && (
+      <button
+        onClick={() => setEditingPackage({})}
+        className="bg-green-600 px-4 py-2 rounded mb-8"
+      >
+        + إضافة باقة
+      </button>
+    )}
+
+    <div className="grid md:grid-cols-3 gap-8">
+      {packages.map((pkg) => (
+        <div
+          key={pkg.id}
+          className="bg-[#0c1f17] p-8 rounded-2xl border border-green-500/20"
+        >
+          <h3 className="text-2xl text-green-400 mb-2">
+            {pkg.duration}
+          </h3>
+
+          <p className="text-3xl mb-6">{pkg.price}</p>
+
+          <ul className="space-y-2 text-gray-300">
+            {pkg.features?.map((f: string, i: number) => (
+              <li key={i}>• {f}</li>
+            ))}
+          </ul>
+
+          {user && (
+            <div className="flex gap-2 mt-6">
+              <button
+                onClick={() => {
+                  setEditingPackage(pkg);
+                  setPkgTitle(pkg.title);
+                  setPkgDuration(pkg.duration);
+                  setPkgPrice(pkg.price);
+                  setPkgFeatures(pkg.features.join("\n"));
+                }}
+                className="bg-yellow-500 px-3 py-1 rounded"
+              >
+                تعديل
+              </button>
+
+              <button
+                onClick={() => deletePackage(pkg.id)}
+                className="bg-red-600 px-3 py-1 rounded"
+              >
+                حذف
+              </button>
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
       {/* Edit Service Modal */}
       {user && editingServiceId && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
@@ -787,7 +1060,64 @@ ${
     حفظ التعديل
   </button>
 )}
+{/*packages model*/}
+{editingPackage !== null && (
+  <div className="fixed inset-0 bg-black/70 flex items-center justify-center">
+    <div className="bg-[#0c1f17] p-8 rounded-xl w-full max-w-lg space-y-4">
 
+      <input
+        placeholder="اسم الباقة"
+        value={pkgTitle}
+        onChange={(e) => setPkgTitle(e.target.value)}
+        className="w-full p-2 bg-black border border-gray-600"
+      />
+
+      <input
+        placeholder="المدة"
+        value={pkgDuration}
+        onChange={(e) => setPkgDuration(e.target.value)}
+        className="w-full p-2 bg-black border border-gray-600"
+      />
+<input
+  placeholder="السعر قبل الخصم"
+  value={pkgOriginalPrice}
+  onChange={(e) => setPkgOriginalPrice(e.target.value)}
+  className="w-full p-2 bg-black border border-gray-600"
+/>
+      <input
+        placeholder="السعر بعد الخصم "
+        value={pkgPrice}
+        onChange={(e) => setPkgPrice(e.target.value)}
+        className="w-full p-2 bg-black border border-gray-600"
+      />
+
+      <textarea
+        placeholder="المميزات (كل ميزة في سطر)"
+        value={pkgFeatures}
+        onChange={(e) => setPkgFeatures(e.target.value)}
+        className="w-full p-2 bg-black border border-gray-600"
+      />
+
+      <div className="flex justify-end gap-3">
+        <button
+          onClick={resetPackage}
+          className="bg-gray-600 px-4 py-2 rounded"
+        >
+          إلغاء
+        </button>
+
+        <button
+          onClick={
+            editingPackage.id ? updatePackage : addPackage
+          }
+          className="bg-green-600 px-4 py-2 rounded"
+        >
+          حفظ
+        </button>
+      </div>
+    </div>
+  </div>
+)}
 
       {/* Add Project Modal */}
       {user && activeTab === "projects" && showProjectModal && (
@@ -1066,14 +1396,48 @@ ${
             تواصل عبر واتساب
           </a>
         </div>
-
       </div>
     </section>
-  
+    {editingClient && (
+  <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+    <div className="bg-[#0c1f17] p-8 rounded-2xl w-[400px] space-y-4">
 
-    
-  
-</main>
-  
-);
+      <input
+        placeholder="اسم العميل"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        className="p-2 bg-black border border-gray-600 w-full"
+      />
+
+      <input
+        placeholder="رابط اللوجو"
+        value={logo}
+        onChange={(e) => setLogo(e.target.value)}
+        className="p-2 bg-black border border-gray-600 w-full"
+      />
+
+      <div className="flex justify-end gap-3">
+        <button
+          onClick={() => setEditingClient(null)}
+          className="bg-gray-600 px-4 py-2 rounded"
+        >
+          إلغاء
+        </button>
+
+        <button
+onClick={() => {
+  if (editingClient?.id) {
+    updateClient();
+  } else {
+    addClient();
+  }
+}}        >
+          حفظ
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+    </main>
+  );
 }
