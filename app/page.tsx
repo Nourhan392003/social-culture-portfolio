@@ -441,14 +441,14 @@ const updatePackage = async () => {
 
 
   return (
-    <main className="bg-black text-white min-h-screen p-10">
+<main className="bg-black text-white min-h-screen px-4 py-6 md:p-10">
       <Toaster position="top-right" />
 
       {/* Header */}
 
 
       {/* Header */}
-      <div className="flex items-center justify-between px-8 pt-6">
+<div className="flex items-center justify-between px-4 md:px-8 pt-4 md:pt-6">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -491,8 +491,10 @@ const updatePackage = async () => {
   <div className="absolute w-[500px] h-[500px] bg-green-500/10 rounded-full blur-3xl animate-pulse top-[-150px] right-[-150px]" />
   <div className="absolute w-[400px] h-[400px] bg-emerald-400/10 rounded-full blur-3xl animate-pulse bottom-[-150px] left-[-150px]" />
 </div>
-     <section className="relative text-center py-24">
-        <h2 className="text-6xl font-bold text-green-400 mb-6">
+    <section className="relative text-center py-12 md:py-24">
+
+       <h2 className="text-3xl sm:text-5xl md:text-6xl font-bold text-green-400 mb-6">
+
           سوشيال كالتشر
         </h2>
         <p className="text-gray-400 max-w-2xl mx-auto">
@@ -823,7 +825,7 @@ ${
             )}
 
             {/* Grid Container */}
-            <div className="grid md:grid-cols-3 gap-8 md:gap-6 mt-12 pb-10 px-4 md:px-0">
+<div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8 pb-10 px-2 md:px-0">
               {packages.map((pkg: any, index: number) => {
                 const isMiddle = index === 1 || index === 3;
                 
@@ -1046,7 +1048,8 @@ ${
 
         {/* Title */}
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-emerald-400 mb-4">
+          <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold text-emerald-400 mb-4">
+
             خلينا نبدأ مشروعك
           </h2>
           <p className="text-gray-400">
@@ -1060,7 +1063,7 @@ ${
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7 }}
           viewport={{ once: true }}
-          className="bg-white/5 backdrop-blur-xl border border-emerald-500/30 rounded-3xl p-10 shadow-[0_0_60px_rgba(16,185,129,0.15)] mb-12"
+          className="bg-white/5 backdrop-blur-xl border border-emerald-500/30 rounded-3xl p-5 shadow-[0_0_60px_rgba(16,185,129,0.15)] mb-10"
         >
           <form
             className="space-y-6"
