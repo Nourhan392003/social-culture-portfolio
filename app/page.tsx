@@ -166,7 +166,10 @@ const loadClients = async () => {
   }
 };
 const loadPackages = async () => {
-  const { data } = await supabase.from("packages").select("*");
+const { data } = await supabase
+  .from("packages")
+  .select("*")
+  .order("id", { ascending: true });
 
   if (data) setPackages(data);
 };
@@ -841,7 +844,7 @@ ${
                     className={`relative bg-[#0c1f17] rounded-3xl p-8 border border-green-500/20 shadow-xl transition-all duration-500 flex flex-col h-full ${
                       isMiddle
                         ? 'md:-mt-8 md:mb-8 border-yellow-400 z-10 shadow-[0_0_30px_rgba(250,204,21,0.15)]'
-                        : 'mt-0 hover:-translate-y-2 hover:shadow-[0_0_20px_rgba(0,255,170,0.1)]'
+                        : ' hover:-translate-y-2 hover:shadow-[0_0_20px_rgba(0,255,170,0.1)]'
                     }`}
                   >
                     {isMiddle && (
