@@ -67,12 +67,14 @@ function Stat({ number, label }: { number: number; label: string }) {
 
 /* ================= Main Component ================= */
 
+
+
 export default function Home() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [services, setServices] = useState<Service[]>([]);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-const [activeTab, setActiveTab] = useState<"services" | "projects" | "packages">("packages");
+const [activeTab, setActiveTab] = useState<'services' | 'projects' | 'packages'>('services');
   const [showServiceModal, setShowServiceModal] = useState(false);
   const [showProjectModal, setShowProjectModal] = useState(false);
   const projectsTrackRef = useRef<HTMLDivElement | null>(null);
@@ -83,6 +85,15 @@ const [clients, setClients] = useState<any[]>([]);
 const [editingClient, setEditingClient] = useState<any>(null);
 const [name, setName] = useState("");
 const [logo, setLogo] = useState("");
+const [selectedCategory, setSelectedCategory] = useState<string>('All');
+
+const categories = ['All', ...Array.from(new Set(projects.map(p => p.details?.category || 'Case Study')))];
+
+// المشاريع المفلترة التي سيتم عرضها
+const filteredProjects = selectedCategory === 'All' ? projects : projects.filter(p => p.details?.category === selectedCategory);
+
+
+
   /* ===== الباقات State ===== */
 const [packages, setPackages] = useState<any[]>([]);
 const [editingPackage, setEditingPackage] = useState<any>(null);
@@ -378,49 +389,57 @@ const updateClient = async () => {
   setLogo("");
   loadClients();
 };
-const addPackage = async () => {
-await supabase.from("packages").insert([
-  {
-    title: pkgTitle,
-    duration: pkgDuration,
-    price: pkgPrice,
-    original_price: pkgOriginalPrice,
-    features: pkgFeatures.split("\n"),
-  },
-]);
-
-  resetPackage();
-  loadPackages();
-};
-
-const updatePackage = async () => {
-  await supabase
-    .from("packages")
-    .update({
+  const addPackage = async () => {
+  try {
+    const { error } = await supabase.from('packages').insert([{
       title: pkgTitle,
       duration: pkgDuration,
       price: pkgPrice,
-      features: pkgFeatures.split("\n"),
-    })
-    .eq("id", editingPackage.id);
-
-  resetPackage();
-  loadPackages();
-};
-{/*packages*/}
-
-const deletePackage = async (id: number) => {
-  await supabase.from("packages").delete().eq("id", id);
-  loadPackages();
+      originalprice: pkgOriginalPrice,
+      features: pkgFeatures ? pkgFeatures.split('\n').map((f: string) => f.trim()).filter(Boolean) : [],
+    }]);
+    if (error) throw error;
+    toast.success('تم إضافة الباقة بنجاح!');
+    resetPackage(); loadPackages();
+  } catch (err: any) { toast.error('حدث خطأ: ' + err.message); }
 };
 
-const resetPackage = () => {
-  setEditingPackage(null);
-  setPkgTitle("");
-  setPkgDuration("");
-  setPkgPrice("");
-  setPkgFeatures("");
+const updatePackage = async () => {
+  try {
+    const { error } = await supabase.from('packages')
+      .update({
+        title: pkgTitle,
+        duration: pkgDuration,
+        price: pkgPrice,
+        originalprice: pkgOriginalPrice,
+        features: pkgFeatures ? pkgFeatures.split('\n').map((f: string) => f.trim()).filter(Boolean) : [],
+      })
+      .eq('id', editingPackage.id);
+    if (error) throw error;
+    toast.success('تم تعديل الباقة بنجاح!');
+    resetPackage(); loadPackages();
+  } catch (err: any) { toast.error('حدث خطأ: ' + err.message); }
 };
+
+
+
+ 
+
+  const deletePackage = async (id: number) => {
+    await supabase.from('packages').delete().eq('id', id);
+    loadPackages();
+  };
+
+  const resetPackage = () => {
+    setEditingPackage(null);
+    setPkgTitle('');
+    setPkgDuration('');
+    setPkgPrice('');
+    setPkgFeatures('');
+  };
+
+
+
   return (
     <main className="bg-black text-white min-h-screen p-10">
       <Toaster position="top-right" />
@@ -428,33 +447,44 @@ const resetPackage = () => {
       {/* Header */}
 
 
-<div className="flex items-center justify-between px-8 pt-6">
- 
-  <motion.div
-  initial={{ opacity: 0, y: -20 }}
-  animate={{ opacity: 1, y: 0 }}
-  transition={{ duration: 0.8 }}
-  whileHover={{ scale: 1.05 }}
->
-  <Image
-    src="/logo.png"
-    alt="Social Culture"
-    width={110}
-    height={60}
-    className="object-contain drop-shadow-[0_0_8px_rgba(0,255,170,0.6)]"
-    priority
-  />
-</motion.div>
+      {/* Header */}
+      <div className="flex items-center justify-between px-8 pt-6">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          whileHover={{ scale: 1.05 }}
+        >
+          <Image
+            src="/logo.png"
+            alt="Social Culture"
+            width={110}
+            height={60}
+            className="object-contain drop-shadow-[0_0_8px_rgba(0,255,170,0.6)]"
+            priority
+          />
+        </motion.div>
 
-  {user && (
-    <button
-      onClick={logout}
-      className="bg-red-600 px-4 py-2 rounded-lg text-sm"
-    >
-      Logout
-    </button>
-  )}
-</div>
+        {/* أزرار الدخول والخروج */}
+        <div>
+          {user ? (
+            <button
+              onClick={logout}
+              className="bg-red-600 px-6 py-2 rounded-xl text-white text-sm font-bold hover:bg-red-700 transition shadow-lg"
+            >
+              تسجيل الخروج
+            </button>
+          ) : (
+            <Link
+              href="/login"
+              className="bg-[#0c1f17] text-green-400 border border-green-500/30 px-6 py-2 rounded-xl text-sm font-bold hover:bg-green-500 hover:text-black transition shadow-[0_0_15px_rgba(0,255,170,0.1)]"
+            >
+              Login
+            </Link>
+          )}
+        </div>
+      </div>
+
 
       {/* About */}
       <div className="absolute inset-0 -z-10 overflow-hidden">
@@ -499,43 +529,42 @@ const resetPackage = () => {
       {/* Services */}
       <section className="mt-24">
         {/* ===== Tabs Header ===== */}
-       <div className="bg-[#0c1f17] p-2 rounded-full flex gap-2">
-
-  <button
-    onClick={() => setActiveTab("services")}
-    className={`px-6 py-2 rounded-full font-bold transition ${
-      activeTab === "services"
-        ? "bg-green-500 text-black"
-        : "text-green-400 hover:bg-green-500/10"
-    }`}
-  >
-    خدماتنا
-  </button>
-
-  <button
-    onClick={() => setActiveTab("projects")}
-    className={`px-6 py-2 rounded-full font-bold transition ${
-      activeTab === "projects"
-        ? "bg-green-500 text-black"
-        : "text-green-400 hover:bg-green-500/10"
-    }`}
-  >
-    مشاريعنا
-  </button>
-
-  {/* 🔥 الجديد */}
-  <button
-    onClick={() => setActiveTab("packages")}
-    className={`px-6 py-2 rounded-full font-bold transition ${
-      activeTab === "packages"
-        ? "bg-green-500 text-black"
-        : "text-green-400 hover:bg-green-500/10"
-    }`}
-  >
-    باقاتنا
-  </button>
-
+ {/* Tabs Header */}
+<div className="flex justify-center mb-10">
+  <div className="bg-[#0c1f17] p-2 rounded-full flex gap-2 w-full max-w-xl shadow-[0_0_20px_rgba(0,255,170,0.1)] border border-green-500/20">
+    <button 
+      onClick={() => setActiveTab('services')} 
+      className={`flex-1 py-3 rounded-full font-bold transition-all duration-300 text-sm md:text-base ${
+        activeTab === 'services' 
+        ? 'bg-green-500 text-black shadow-md' 
+        : 'text-gray-400 hover:text-green-400 hover:bg-green-500/10'
+      }`}
+    >
+      خدماتنا
+    </button>
+    <button 
+      onClick={() => setActiveTab('projects')} 
+      className={`flex-1 py-3 rounded-full font-bold transition-all duration-300 text-sm md:text-base ${
+        activeTab === 'projects' 
+        ? 'bg-green-500 text-black shadow-md' 
+        : 'text-gray-400 hover:text-green-400 hover:bg-green-500/10'
+      }`}
+    >
+      مشاريعنا
+    </button>
+    <button 
+      onClick={() => setActiveTab('packages')} 
+      className={`flex-1 py-3 rounded-full font-bold transition-all duration-300 text-sm md:text-base ${
+        activeTab === 'packages' 
+        ? 'bg-green-500 text-black shadow-md' 
+        : 'text-gray-400 hover:text-green-400 hover:bg-green-500/10'
+      }`}
+    >
+      باقاتنا
+    </button>
+  </div>
 </div>
+
         {/* ===== Tab Content ===== */}
        <motion.div
   key={activeTab}
@@ -547,7 +576,7 @@ const resetPackage = () => {
           {/* ================= Services ================= */}
           {activeTab === "services" && (
             <div>
-              {user && (
+         const updatePackage     {user && (
                 <div className="flex justify-between items-center mb-8">
                   <h2 className="text-3xl font-bold text-green-400">
                     خدماتنا
@@ -582,13 +611,20 @@ ${
               </span>
             )}
 
-            {service.image_url && (
-              <img
-                src={service.image_url}
-                alt={service.title}
-                className="w-full h-40 object-cover rounded-xl mb-4"
-              />
-            )}
+         {service.image_url && (
+  <div className="relative w-full h-40 mb-4">
+    <img 
+      src={service.image_url} 
+      alt={service.title} 
+      className="w-full h-full object-cover rounded-xl" 
+      loading="lazy"
+    />
+  </div>
+)}
+
+
+
+            )
 
             <h3 className="text-xl font-bold text-green-400 mb-3">
               {service.title}
@@ -658,605 +694,334 @@ ${
           )}
 
           {/* ================= Projects ================= */}
-          {activeTab === "projects" && (
-            <div>
+{/* المشاريع */}
+        {/* Projects */}
+        {activeTab === 'projects' && (
+          <div>
+            <div className="flex flex-wrap gap-3 justify-center mb-10">
+              {categories.map((cat, i) => (
+                <button
+                  key={i}
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`px-5 py-2 rounded-full text-sm font-semibold transition-all duration-300 ${
+                    selectedCategory === cat
+                      ? 'bg-green-500 text-black shadow-[0_0_15px_rgba(0,255,170,0.4)]'
+                      : 'bg-[#0c1f17] text-gray-400 border border-green-500/20 hover:text-green-400 hover:border-green-500/50'
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+
+            <div className="flex justify-between items-center mb-8">
+              <h2 className="text-3xl font-bold text-green-400">أعمالنا</h2>
               {user && (
-                <div className="flex justify-between items-center mb-8">
-                  <h2 className="text-3xl font-bold text-green-400">
-                    مشاريعنا
-                  </h2>
-                  <button
-                    onClick={() => setShowProjectModal(true)}
-                    className="bg-green-500 text-black px-6 py-2 rounded-xl font-bold hover:scale-105 transition"
-                  >
-                    + إضافة مشروع
-                  </button>
-                </div>
+                <button onClick={() => setShowProjectModal(true)} className="bg-green-500 text-black px-6 py-2 rounded-xl font-bold hover:scale-105 transition">
+                  + إضافة مشروع
+                </button>
               )}
+            </div>
 
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-  {projects.map((project) => (
-    <div
-      key={project.id}
-      className="bg-[#0c1f17] rounded-3xl p-6 border border-green-500/20 shadow-xl transition hover:-translate-y-2 hover:shadow-[0_20px_40px_rgba(0,255,150,0.15)]"
-    >
-      {project.image_url && (
-        <img
-          src={project.image_url}
-          alt={project.title}
-          className="w-full h-56 object-cover rounded-2xl mb-5"
-        />
-      )}
+            <motion.div layout className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {filteredProjects.map((project: any) => {
+                const imageUrl = project.imageurl || project.image_url;
 
-      <span className="px-3 py-1 rounded-full bg-green-500/10 border border-green-500/30 text-xs text-green-300">
-        {project.details?.category ?? "Case Study"}
-      </span>
+                return (
+                  <motion.div
+                    layout
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    transition={{ duration: 0.3 }}
+                    key={project.id}
+                    className="bg-[#0c1f17] rounded-3xl p-6 border border-green-500/20 shadow-xl transition-all duration-300 ease-in-out hover:-translate-y-2 hover:shadow-[0_15px_40px_rgba(0,255,150,0.15)] hover:scale-[1.02] flex flex-col h-full"
+                  >
+                    {/* الصورة */}
+                    {imageUrl ? (
+                      <div className="relative w-full h-40 mb-4 shrink-0">
+                        <img
+                          src={imageUrl}
+                          alt={project.title}
+                          className="w-full h-full object-cover rounded-xl"
+                          loading="lazy"
+                        />
+                      </div>
+                    ) : (
+                      <div className="relative w-full h-40 mb-4 shrink-0 bg-green-900/20 flex items-center justify-center rounded-xl border border-green-500/10">
+                        <span className="text-green-500/50 text-sm font-semibold">لا توجد صورة مضافة</span>
+                      </div>
+                    )}
 
-      <h3 className="text-2xl font-bold text-green-400 my-4">
-        {project.title}
-      </h3>
+                    <div className="mb-3 mt-2">
+                      <span className="px-3 py-1 rounded-full bg-green-500/10 border border-green-500/30 text-xs text-green-300">
+                        {project.details?.category ?? 'دراسة حالة'}
+                      </span>
+                    </div>
 
-      <p className="text-gray-400 text-sm mb-4">
-        {project.details?.challenge ?? project.description}
-      </p>
+                    <h3 className="text-xl font-bold text-green-400 mb-3">
+                      {project.title}
+                    </h3>
 
-      <div className="flex flex-wrap gap-2 mb-4">
-        {(project.details?.results ?? []).slice(0, 2).map((r, i) => (
-          <span
-            key={i}
-            className="px-3 py-1 text-xs rounded-full bg-black/30 border border-green-400/40"
-          >
-            {r}
-          </span>
-        ))}
-      </div>
+                    <p className="text-gray-400 text-sm mb-4 line-clamp-3 flex-grow">
+                      {project.details?.challenge ?? project.description}
+                    </p>
 
-      <div className="flex justify-between items-center">
-        <Link
-          href={`/projects/${project.id}`}
-          className="text-green-400 text-sm hover:underline"
-        >
-          عرض التفاصيل →
-        </Link>
+                    <div className="flex justify-between items-center mt-auto pt-4 border-t border-green-500/10">
+                      <Link href={`/projects/${project.id}`} className="text-green-400 text-sm hover:underline font-semibold">
+                        عرض التفاصيل ←
+                      </Link>
 
-        {user && (
-          <div className="flex gap-2">
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setEditingProjectId(project.id);
-                setEditProjectTitle(project.title);
-                setEditProjectDesc(project.description);
-                setEditProjectImage(project.image_url || "");
-              }}
-              className="bg-yellow-500 text-black px-3 py-1 rounded text-xs"
-            >
-              تعديل
-            </button>
-
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                deleteProject(project.id);
-              }}
-              className="bg-red-600 text-white px-3 py-1 rounded text-xs"
-            >
-              حذف
-            </button>
+                      {user && (
+                        <div className="flex gap-2">
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setEditingProjectId(project.id);
+                              setEditProjectTitle(project.title);
+                              setEditProjectDesc(project.description);
+                              setEditProjectImage(imageUrl);
+                            }}
+                            className="bg-yellow-500 text-black px-3 py-1 rounded text-xs font-bold"
+                          >
+                            تعديل
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              deleteProject(project.id);
+                            }}
+                            className="bg-red-600 text-white px-3 py-1 rounded text-xs font-bold"
+                          >
+                            حذف
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </motion.div>
           </div>
         )}
-      </div>
-    </div>
-  ))}
-</div>
+
+        {/* packages */}
+        {activeTab === 'packages' && (
+          <div>
+            {user && (
+              <div className="flex justify-between items-center mb-8">
+                <h2 className="text-3xl font-bold text-green-400">إدارة الباقات</h2>
+                <button
+                  onClick={() => setEditingPackage({})}
+                  className="bg-green-500 text-black px-6 py-2 rounded-xl font-bold hover:scale-105 transition"
+                >
+                  + إضافة باقة
+                </button>
               </div>
-          )}
-          {/*packages*/}
-{activeTab === "packages" && (
-  <div>
+            )}
 
-    {user && (
-      <div className="flex justify-between items-center mb-8">
-        <h2 className="text-3xl font-bold text-green-400">
-          باقاتنا
-        </h2>
+            {/* Grid Container */}
+            <div className="grid md:grid-cols-3 gap-8 md:gap-6 mt-12 pb-10 px-4 md:px-0">
+              {packages.map((pkg: any, index: number) => {
+                const isMiddle = index === 1 || index === 3;
+                
+                // هنا يتم فك دمج السعرين بشكل ذكي
+                const priceStr = String(pkg.price || "");
+                const hasOldPrice = priceStr.includes('|');
+                const oldPrice = hasOldPrice ? priceStr.split('|')[0] : "";
+                const currentPrice = hasOldPrice ? priceStr.split('|')[1] : priceStr;
 
-        <button
-          onClick={() => setEditingPackage({})}
-          className="bg-green-500 text-black px-6 py-2 rounded-xl font-bold hover:scale-105 transition"
-        >
-          + إضافة باقة
-        </button>
-      </div>
+                return (
+                  <div
+                    key={pkg.id}
+                    className={`relative bg-[#0c1f17] rounded-3xl p-8 border border-green-500/20 shadow-xl transition-all duration-500 flex flex-col h-full ${
+                      isMiddle
+                        ? 'md:-mt-8 md:mb-8 border-yellow-400 z-10 shadow-[0_0_30px_rgba(250,204,21,0.15)]'
+                        : 'mt-0 hover:-translate-y-2 hover:shadow-[0_0_20px_rgba(0,255,170,0.1)]'
+                    }`}
+                  >
+                    {isMiddle && (
+                      <div className="absolute -top-4 left-0 right-0 flex justify-center">
+                        <span className="bg-gradient-to-r from-yellow-400 to-yellow-500 text-black text-xs font-bold px-6 py-1.5 rounded-full shadow-lg">
+                          الأكثر طلباً
+                        </span>
+                      </div>
+                    )}
+
+                  {/* Package Header */}
+<div className="text-center mb-8 border-b border-green-500/10 pb-6">
+ <h3 className="text-2xl font-bold text-green-400 mb-4">{pkg.title}</h3>
+<p className="text-sm text-gray-400 mb-2"> <span className="text-white font-semibold">{pkg.duration}</span></p>
+
+  <p className="text-gray-400 text-sm mb-4">{pkg.duration}</p>
+  <div className="flex flex-col items-center justify-center min-h-[100px]">
+    {pkg.originalprice && pkg.originalprice.trim() !== "" && (
+      <span className="text-gray-500 line-through text-lg mb-1">
+        {pkg.originalprice} ريال
+      </span>
     )}
+    <div className="flex items-baseline gap-1">
+      <span className="text-4xl font-bold text-yellow-400">{pkg.price}</span>
+      <span className="text-gray-400 text-sm">ريال</span>
+    </div>
+    <span className="text-xs bg-red-600/20 text-red-500 border border-red-500/30 px-3 py-1 rounded-full font-bold mt-3 inline-block">
+      عرض العيد 🎁
+    </span>
+  </div>
+</div>
 
-    {/* Grid / Scroll Container */}
- {/* Grid / Scroll Container */}
-<div className="flex md:grid md:grid-cols-3 gap-6 overflow-x-auto md:overflow-visible pb-4">
 
-  {packages.map((pkg, index) => {
-    const isMiddle = index === 1;
+                    {/* Features List */}
+                    <ul className="space-y-4 text-gray-300 text-sm flex-grow mb-8">
+                      {pkg.features?.map((f: string, i: number) => (
+                        <li key={i} className="flex items-start gap-3">
+                          <div className="bg-green-500/20 p-1 rounded-full shrink-0 mt-0.5">
+                            <svg className="w-3 h-3 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                            </svg>
+                          </div>
+                          <span className="leading-relaxed">{f}</span>
+                        </li>
+                      ))}
+                    </ul>
 
-    return (
-      <div
-        key={pkg.id}
-        className={`relative bg-[#0c1f17] rounded-3xl p-6 border border-green-500/20 shadow-xl transition duration-500 min-w-[280px] md:min-w-0
-        ${isMiddle ? "md:scale-110 border-yellow-400 z-10" : "hover:scale-105"}
-        `}
-      >
-
-        {isMiddle && (
-          <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-yellow-400 text-black text-xs font-bold px-4 py-1 rounded-full">
-            الأكثر طلباً ⭐
-          </span>
+                    {/* Admin Controls */}
+                    {user ? (
+                      <div className="flex gap-3 mt-auto pt-6 border-t border-green-500/20">
+                        <button
+                          onClick={() => {
+                            setEditingPackage(pkg);
+                            setPkgTitle(pkg.title || "");
+                            setPkgDuration(pkg.duration || "");
+                            setPkgPrice(currentPrice); // جلب السعر الجديد فقط للخانة
+                            setPkgOriginalPrice(oldPrice); // جلب السعر القديم فقط للخانة
+                            setPkgFeatures(pkg.features ? pkg.features.join("\n") : ""); 
+                          }}
+                          className="flex-1 bg-yellow-500/10 text-yellow-500 border border-yellow-500/50 hover:bg-yellow-500 hover:text-black transition-colors py-2.5 rounded-xl text-sm font-bold"
+                        >
+                          تعديل
+                        </button>
+                        <button
+                          onClick={() => {
+                            if (confirm('هل أنت متأكد من الحذف؟')) deletePackage(pkg.id);
+                          }}
+                          className="flex-1 bg-red-500/10 text-red-500 border border-red-500/50 hover:bg-red-600 hover:text-white hover:border-red-600 transition-colors py-2.5 rounded-xl text-sm font-bold"
+                        >
+                          حذف
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="mt-auto">
+                        <Link href="#contact" className={`block w-full py-4 rounded-xl text-center font-bold transition-all duration-300 ${isMiddle ? 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-black hover:scale-105 shadow-lg' : 'bg-green-500/10 text-green-400 border border-green-500/30 hover:bg-green-500 hover:text-black'}`}>
+                          اطلب الباقة الآن
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         )}
-
-        <h3 className="text-xl font-bold text-green-400 mb-2">
-          {pkg.duration}
-        </h3>
-
-        <div className="mb-4">
-         <p className="text-gray-500 line-through text-lg">
-  {pkg.original_price} ريال
-</p>
-
-          <p className="text-3xl font-bold text-yellow-400">
-            {pkg.price} ريال
-          </p>
-
-          <span className="text-xs bg-red-600 px-3 py-1 rounded-full font-bold">
-            عرض العيد 🎉
-          </span>
-        </div>
-
-        <ul className="space-y-2 text-gray-300 text-sm">
-          {(pkg.features || []).map((f: string, i: number) => (
-            <li key={i}>• {f}</li>
-          ))}
-        </ul>
-
-      </div>
-    );
-  })}
-</div>
-</div>
-)}
-        </motion.div>
-      </section>
-
-     {/* Client Logos */}
-<section className="py-24 bg-black overflow-hidden">
-  <div className="max-w-6xl mx-auto px-6 mb-16 text-center">
-    <h2 className="text-3xl md:text-4xl font-bold text-green-400 mb-4">
-      عملاؤنا
-    </h2>
-    <p className="text-gray-500">
-      نعتز بثقة شركائنا في مختلف القطاعات
-    </p>
-  </div>
-
-  <div className="relative w-full overflow-hidden group">
-
-    {/* Fade edges */}
-    <div className="absolute left-0 top-0 w-40 h-full bg-gradient-to-r from-black via-black/80 to-transparent z-10 pointer-events-none" />
-    <div className="absolute right-0 top-0 w-40 h-full bg-gradient-to-l from-black via-black/80 to-transparent z-10 pointer-events-none" />
-
-    <motion.div
-      className="flex gap-16 md:gap-24"
-      animate={{ x: ["0%", "-50%"] }}
-      transition={{
-        repeat: Infinity,
-        duration: Math.max(20, clients.length * 5),
-        ease: "linear",
-      }}
-      whileHover={{ animationPlayState: "paused" }}
-    >
-      {[...clients, ...clients].map((client, index) => (
-        <div
-          key={index}
-          className="flex flex-col items-center justify-center min-w-[140px] md:min-w-[180px] transition duration-300"
-        >
-          {client.logo_url ? (
-            <img
-              src={client.logo_url}
-              alt={client.name}
-              className="max-h-10 md:max-h-12 object-contain grayscale opacity-70 hover:grayscale-0 hover:opacity-100 transition duration-300"
-            />
-          ) : (
-            <span className="text-gray-500 text-sm md:text-base">
-              {client.name}
-            </span>
-          )}
-        </div>
-      ))}
-    </motion.div>
-  </div>
+</motion.div>
 </section>
 
+       
+     
+
+
+   
       {/* Add Service Modal */}
       {user && activeTab === "services" && showServiceModal && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
           <div className="bg-[#0c1f17] p-6 rounded-2xl w-full max-w-lg">
-            <h3 className="text-green-400 mb-4 font-bold">
-              إضافة خدمة جديدة
-            </h3>
-
-            <input
-              type="text"
-              placeholder="عنوان الخدمة"
-              value={newServiceTitle}
-              onChange={(e) => setNewServiceTitle(e.target.value)}
-              className="w-full p-3 mb-3 rounded bg-black border border-green-600/30"
-            />
-
-            <input
-              type="text"
-              placeholder="وصف الخدمة"
-              value={newServiceDesc}
-              onChange={(e) => setNewServiceDesc(e.target.value)}
-              className="w-full p-3 mb-3 rounded bg-black border border-green-600/30"
-            />
-
-            <input
-              type="text"
-              placeholder="رابط الصورة"
-              value={newServiceImage}
-              onChange={(e) => setNewServiceImage(e.target.value)}
-              className="w-full p-3 mb-3 rounded bg-black border border-green-600/30"
-            />
-
+            <h3 className="text-green-400 mb-4 font-bold">إضافة خدمة جديدة</h3>
+            <input type="text" placeholder="العنوان" value={newServiceTitle} onChange={(e) => setNewServiceTitle(e.target.value)} className="w-full p-3 mb-3 rounded bg-black border border-green-600/30" />
+            <input type="text" placeholder="الوصف" value={newServiceDesc} onChange={(e) => setNewServiceDesc(e.target.value)} className="w-full p-3 mb-3 rounded bg-black border border-green-600/30" />
+            <input type="text" placeholder="رابط الصورة" value={newServiceImage} onChange={(e) => setNewServiceImage(e.target.value)} className="w-full p-3 mb-3 rounded bg-black border border-green-600/30" />
             <label className="block mb-3">
-              <input
-                type="checkbox"
-                checked={newServiceFeatured}
-                onChange={(e) => setNewServiceFeatured(e.target.checked)}
-              />
-              Featured
+              <input type="checkbox" checked={newServiceFeatured} onChange={(e) => setNewServiceFeatured(e.target.checked)} /> خدمة مميزة؟
             </label>
-
             <div className="flex gap-3">
-              <button
-                onClick={addService}
-                className="bg-green-500 px-6 py-2 rounded text-black font-bold"
-              >
-                حفظ
-              </button>
-
-              <button
-                onClick={() => setShowServiceModal(false)}
-                className="bg-gray-600 px-6 py-2 rounded"
-              >
-                إلغاء
-              </button>
+              <button onClick={addService} className="bg-green-500 px-6 py-2 rounded text-black font-bold">حفظ</button>
+              <button onClick={() => setShowServiceModal(false)} className="bg-gray-600 px-6 py-2 rounded">إلغاء</button>
             </div>
           </div>
         </div>
       )}
-{/*packages*/}
-<section className="py-24 bg-black text-white">
-  <div className="max-w-7xl mx-auto px-6">
 
-    <h2 className="text-4xl text-green-400 text-center mb-16">
-      باقاتنا
-    </h2>
-
-    {user && (
-      <button
-        onClick={() => setEditingPackage({})}
-        className="bg-green-600 px-4 py-2 rounded mb-8"
-      >
-        + إضافة باقة
-      </button>
-    )}
-
-    <div className="grid md:grid-cols-3 gap-8">
-      {packages.map((pkg) => (
-        <div
-          key={pkg.id}
-          className="bg-[#0c1f17] p-8 rounded-2xl border border-green-500/20"
-        >
-          <h3 className="text-2xl text-green-400 mb-2">
-            {pkg.duration}
-          </h3>
-
-          <p className="text-3xl mb-6">{pkg.price}</p>
-
-          <ul className="space-y-2 text-gray-300">
-            {pkg.features?.map((f: string, i: number) => (
-              <li key={i}>• {f}</li>
-            ))}
-          </ul>
-
-          {user && (
-            <div className="flex gap-2 mt-6">
-              <button
-                onClick={() => {
-                  setEditingPackage(pkg);
-                  setPkgTitle(pkg.title);
-                  setPkgDuration(pkg.duration);
-                  setPkgPrice(pkg.price);
-                  setPkgFeatures(pkg.features.join("\n"));
-                }}
-                className="bg-yellow-500 px-3 py-1 rounded"
-              >
-                تعديل
-              </button>
-
-              <button
-                onClick={() => deletePackage(pkg.id)}
-                className="bg-red-600 px-3 py-1 rounded"
-              >
-                حذف
-              </button>
-            </div>
-          )}
-        </div>
-      ))}
-    </div>
-  </div>
-</section>
       {/* Edit Service Modal */}
-      {user && editingServiceId && (
+      {user && editingServiceId !== null && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
           <div className="bg-[#0c1f17] p-6 rounded-2xl w-full max-w-lg">
-            <h3 className="text-green-400 mb-4 font-bold">
-              تعديل الخدمة
-            </h3>
-
-            <input
-              value={editServiceTitle}
-              onChange={(e) => setEditServiceTitle(e.target.value)}
-              className="w-full p-3 mb-3 rounded bg-black border border-green-600/30"
-            />
-
-            <input
-              value={editServiceDesc}
-              onChange={(e) => setEditServiceDesc(e.target.value)}
-              className="w-full p-3 mb-3 rounded bg-black border border-green-600/30"
-            />
-
-            <input
-              value={editServiceImage}
-              onChange={(e) => setEditServiceImage(e.target.value)}
-              className="w-full p-3 mb-3 rounded bg-black border border-green-600/30"
-            />
-
+            <h3 className="text-green-400 mb-4 font-bold">تعديل الخدمة</h3>
+            <input value={editServiceTitle} onChange={(e) => setEditServiceTitle(e.target.value)} className="w-full p-3 mb-3 rounded bg-black border border-green-600/30" />
+            <input value={editServiceDesc} onChange={(e) => setEditServiceDesc(e.target.value)} className="w-full p-3 mb-3 rounded bg-black border border-green-600/30" />
+            <input value={editServiceImage} onChange={(e) => setEditServiceImage(e.target.value)} className="w-full p-3 mb-3 rounded bg-black border border-green-600/30" />
             <label className="block mb-3">
-              <input
-                type="checkbox"
-                checked={editServiceFeatured}
-                onChange={(e) => setEditServiceFeatured(e.target.checked)}
-              />
-              Featured
+              <input type="checkbox" checked={editServiceFeatured} onChange={(e) => setEditServiceFeatured(e.target.checked)} /> خدمة مميزة؟
             </label>
-
             <div className="flex gap-3">
-              <button
-                onClick={saveServiceEdit}
-                className="bg-green-500 px-6 py-2 rounded text-black"
-              >
-                حفظ
-              </button>
-
-              <button
-                onClick={() => setEditingServiceId(null)}
-                className="bg-gray-600 px-6 py-2 rounded"
-              >
-                إلغاء
-              </button>
+              <button onClick={saveServiceEdit} className="bg-green-500 px-6 py-2 rounded text-black">تعديل</button>
+              <button onClick={() => setEditingServiceId(null)} className="bg-gray-600 px-6 py-2 rounded">إلغاء</button>
             </div>
-
           </div>
-
         </div>
       )}
-      {editingServiceId && (
-  <button
-    onClick={saveServiceEdit}
-    className="bg-blue-500 text-black px-6 py-2 rounded mt-3"
-  >
-    حفظ التعديل
-  </button>
-)}
-{/*packages model*/}
-{editingPackage !== null && (
-  <div className="fixed inset-0 bg-black/70 flex items-center justify-center">
-    <div className="bg-[#0c1f17] p-8 rounded-xl w-full max-w-lg space-y-4">
 
-      <input
-        placeholder="اسم الباقة"
-        value={pkgTitle}
-        onChange={(e) => setPkgTitle(e.target.value)}
-        className="w-full p-2 bg-black border border-gray-600"
-      />
-
-      <input
-        placeholder="المدة"
-        value={pkgDuration}
-        onChange={(e) => setPkgDuration(e.target.value)}
-        className="w-full p-2 bg-black border border-gray-600"
-      />
-<input
-  placeholder="السعر قبل الخصم"
-  value={pkgOriginalPrice}
-  onChange={(e) => setPkgOriginalPrice(e.target.value)}
-  className="w-full p-2 bg-black border border-gray-600"
-/>
-      <input
-        placeholder="السعر بعد الخصم "
-        value={pkgPrice}
-        onChange={(e) => setPkgPrice(e.target.value)}
-        className="w-full p-2 bg-black border border-gray-600"
-      />
-
-      <textarea
-        placeholder="المميزات (كل ميزة في سطر)"
-        value={pkgFeatures}
-        onChange={(e) => setPkgFeatures(e.target.value)}
-        className="w-full p-2 bg-black border border-gray-600"
-      />
-
-      <div className="flex justify-end gap-3">
-        <button
-          onClick={resetPackage}
-          className="bg-gray-600 px-4 py-2 rounded"
-        >
-          إلغاء
-        </button>
-
-        <button
-          onClick={
-            editingPackage.id ? updatePackage : addPackage
-          }
-          className="bg-green-600 px-4 py-2 rounded"
-        >
-          حفظ
-        </button>
-      </div>
-    </div>
-  </div>
-)}
-
-      {/* Add Project Modal */}
-      {user && activeTab === "projects" && showProjectModal && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-          <div className="bg-[#0c1f17] p-6 rounded-2xl w-full max-w-lg">
-            <h3 className="text-green-400 mb-4 font-bold">
-              إضافة مشروع جديد
+           {/* packages model */}
+      {editingPackage !== null && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+          <div className="bg-[#0c1f17] p-8 rounded-xl w-full max-w-lg space-y-4 shadow-2xl">
+            <h3 className="text-2xl font-bold text-green-400 mb-6 text-center">
+              {editingPackage.id ? 'تعديل الباقة' : 'إضافة باقة جديدة'}
             </h3>
-
-            <input
-              type="text"
-              placeholder="عنوان المشروع"
-              value={newProjectTitle}
-              onChange={(e) => setNewProjectTitle(e.target.value)}
-              className="w-full p-3 mb-3 rounded bg-black border border-green-600/30"
+            
+            <input 
+              placeholder="اسم الباقة (مثال: الباقة الأساسية - شهر)" 
+              value={pkgTitle} 
+              onChange={(e) => setPkgTitle(e.target.value)} 
+              className="w-full p-3 bg-black border border-green-500/30 rounded-xl" 
             />
-
             <input
-              type="text"
-              placeholder="وصف المشروع"
-              value={newProjectDesc}
-              onChange={(e) => setNewProjectDesc(e.target.value)}
-              className="w-full p-3 mb-3 rounded bg-black border border-green-600/30"
+  placeholder="المدة (مثال: شهر، 3 أشهر، سنة)"
+  value={pkgDuration}
+  onChange={e => setPkgDuration(e.target.value)}
+  className="w-full p-3 bg-black border border-green-500/30 rounded-xl"
+/>
+            
+            <input 
+              placeholder="السعر قبل الخصم (اختياري - سيظهر مشطوباً)" 
+              value={pkgOriginalPrice} 
+              onChange={(e) => setPkgOriginalPrice(e.target.value)} 
+              className="w-full p-3 bg-black border border-green-500/30 rounded-xl" 
             />
-<input
-  type="text"
-  placeholder="التحدي (اختياري لو مختلف عن الوصف)"
-  value={newProjectChallenge}
-  onChange={(e) => setNewProjectChallenge(e.target.value)}
-  className="w-full p-3 mb-3 rounded bg-black border border-green-600/30"
-/>
-
-<input
-  type="text"
-  placeholder="التصنيف (مثال: E-commerce Case Study)"
-  value={newProjectCategory}
-  onChange={(e) => setNewProjectCategory(e.target.value)}
-  className="w-full p-3 mb-3 rounded bg-black border border-green-600/30"
-/>
-
-<input
-  type="text"
-  placeholder="مدة التنفيذ (مثال: خلال 6 أشهر)"
-  value={newProjectDuration}
-  onChange={(e) => setNewProjectDuration(e.target.value)}
-  className="w-full p-3 mb-3 rounded bg-black border border-green-600/30"
-/>
-
-<textarea
-  placeholder="الاستراتيجية (كل نقطة في سطر)"
-  value={newProjectStrategy}
-  onChange={(e) => setNewProjectStrategy(e.target.value)}
-  className="w-full p-3 mb-3 rounded bg-black border border-green-600/30 h-28"
-/>
-
-<textarea
-  placeholder="النتائج (كل نتيجة في سطر) مثال: +45% زيادة في المبيعات"
-  value={newProjectResults}
-  onChange={(e) => setNewProjectResults(e.target.value)}
-  className="w-full p-3 mb-3 rounded bg-black border border-green-600/30 h-24"
-/>
-            <input
-              type="text"
-              placeholder="رابط الصورة"
-              value={newProjectImage}
-              onChange={(e) => setNewProjectImage(e.target.value)}
-              className="w-full p-3 mb-3 rounded bg-black border border-green-600/30"
+            
+            <input 
+              placeholder="السعر الحالي" 
+              value={pkgPrice} 
+              onChange={(e) => setPkgPrice(e.target.value)} 
+              className="w-full p-3 bg-black border border-green-500/30 rounded-xl" 
             />
-
-            <div className="flex gap-3">
-              <button
-                onClick={addProject}
-                className="bg-green-500 px-6 py-2 rounded text-black font-bold"
-              >
-                حفظ
-              </button>
-
-              <button
-                onClick={() => setShowProjectModal(false)}
-                className="bg-gray-600 px-6 py-2 rounded"
-              >
-                إلغاء
+            
+            <textarea 
+              placeholder="المميزات (افصل بينها بفاصلة ،)" 
+              value={pkgFeatures} 
+              onChange={(e) => setPkgFeatures(e.target.value)} 
+              className="w-full p-3 bg-black border border-green-500/30 rounded-xl h-32" 
+            />
+            
+            <div className="flex justify-end gap-3 pt-4">
+              <button onClick={resetPackage} className="bg-gray-600 px-6 py-3 rounded-xl text-white font-bold w-full">إلغاء</button>
+              <button onClick={editingPackage.id ? updatePackage : addPackage} className="bg-green-600 px-6 py-3 rounded-xl text-black font-bold w-full">
+                {editingPackage.id ? 'حفظ التعديلات' : 'إضافة الباقة'}
               </button>
             </div>
           </div>
         </div>
       )}
-
-      {user && editingProjectId && (
-  <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-    <div className="bg-[#0c1f17] p-6 rounded-2xl w-full max-w-lg">
-      <h3 className="text-green-400 mb-4 font-bold">
-        تعديل المشروع
-      </h3>
-
-      <input
-        value={editProjectTitle}
-        onChange={(e) => setEditProjectTitle(e.target.value)}
-        className="w-full p-3 mb-3 rounded bg-black border border-green-600/30"
-      />
-
-      <input
-        value={editProjectDesc}
-        onChange={(e) => setEditProjectDesc(e.target.value)}
-        className="w-full p-3 mb-3 rounded bg-black border border-green-600/30"
-      />
-
-      <input
-        value={editProjectImage}
-        onChange={(e) => setEditProjectImage(e.target.value)}
-        className="w-full p-3 mb-3 rounded bg-black border border-green-600/30"
-      />
-
-      <label className="block mb-3">
-
-       
-        Featured
-      </label>
-
-      <div className="flex gap-3">
-        <button
-          onClick={saveProjectEdit}
-          className="bg-green-500 px-6 py-2 rounded text-black"
-        >
-          حفظ
-        </button>
-
-        <button
-          onClick={() => setEditingProjectId(null)}
-          className="bg-gray-600 px-6 py-2 rounded"
-        >
-          إلغاء
-        </button>
-      </div>
-    </div>
-
-  </div>
-
-)}
 
 
 

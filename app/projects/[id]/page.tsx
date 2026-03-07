@@ -145,11 +145,13 @@ export default function ProjectCaseStudyPage() {
               transition={{ duration: 0.6, delay: 0.15 }}
             >
               <button
-                onClick={() => router.push("/")}
-                className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-white/5 border border-white/15 text-xs md:text-sm text-gray-200 hover:bg-white/10 transition"
-              >
-                <span>← الرجوع إلى المشاريع</span>
-              </button>
+             
+  onClick={() => window.location.href = '/'} 
+  className="inline-flex items-center gap-2 text-gray-400 hover:text-green-400 transition-colors mb-8 border border-gray-800 hover:border-green-500/50 px-4 py-2 rounded-full text-sm"
+>
+  ← الرجوع للرئيسية
+</button>
+
             </motion.div>
           </div>
         </div>
@@ -284,125 +286,35 @@ export default function ProjectCaseStudyPage() {
 </div>
         </motion.section>
 
-        {/* Testimonial */}
-        <motion.section
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-        >
-          <div className="max-w-xl mx-auto relative">
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <span className="text-6xl md:text-7xl text-emerald-900/35 font-serif">
-                “
-              </span>
-            </div>
+             {/* ملخص النجاح (بديل كارت العميل) */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.4 }}
+        className="max-w-3xl mx-auto mt-16 p-8 rounded-3xl bg-gradient-to-b from-[#0c1f17] to-black border border-green-500/20 shadow-[0_0_30px_rgba(0,255,170,0.05)] relative overflow-hidden"
+      >
+        {/* تأثير جمالي في الخلفية */}
+        <div className="absolute -top-10 -right-10 w-32 h-32 bg-green-500/10 rounded-full blur-2xl"></div>
+        <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl"></div>
 
-            <div className="relative bg-[#050c09] border border-emerald-500/50 shadow-[0_0_40px_rgba(16,185,129,0.5)] rounded-3xl px-6 py-7 flex flex-col items-center text-center space-y-4">
-              <div className="w-20 h-20 rounded-full overflow-hidden border border-green-400/70 mb-1">
-                {project.image_url ? (
-                  <img
-                    src={project.image_url}
-                    alt={project.title}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-emerald-700 to-emerald-900 flex items-center justify-center text-2xl text-white">
-                    {project.title.charAt(0)}
-                  </div>
-                )}
-              </div>
-
-              <div className="flex items-center justify-center gap-1 text-sm text-yellow-400">
-                <span>★★★★★</span>
-              </div>
-
-              <div>
-                <p className="text-sm md:text-base font-semibold text-green-400">
-                  اسم العميل
-                </p>
-                <p className="text-xs md:text-sm text-gray-400">
-                  CEO / Founder
-                </p>
-              </div>
-
-              <p className="text-sm md:text-base text-gray-300 leading-relaxed">
-                تجربة العمل مع سوشيال كالتشر كانت نقطة تحول حقيقية في حضورنا
-                الرقمي. الفريق فهم التحديات من اليوم الأول، وركز على بناء
-                نتائج ملموسة يمكن قياسها وليس مجرد تواجد شكلي على المنصات.
-              </p>
-            </div>
+        <div className="relative z-10 text-center space-y-4">
+          {/* أيقونة تعبر عن النجاح بدلاً من صورة العميل */}
+          <div className="w-16 h-16 mx-auto bg-green-500/10 rounded-2xl flex items-center justify-center border border-green-500/30 mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
           </div>
-        </motion.section>
-{/* Client Logos */}
-{clients.length > 0 && (
-  <motion.section
-    initial={{ opacity: 0, y: 40 }}
-    whileInView={{ opacity: 1, y: 0 }}
-    viewport={{ once: true, margin: "-100px" }}
-    transition={{ duration: 0.8, ease: "easeOut" }}
-    className="relative pt-20 pb-10"
-  >
-    {/* Background glow */}
-    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-green-500/5 rounded-full blur-[120px] -z-10" />
-
-    <div className="text-center mb-16">
-      <h2 className="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-500 mb-4">
-        عملاؤنا
-      </h2>
-      <p className="text-gray-400 text-sm md:text-base max-w-lg mx-auto">
-        شركات رائدة وثقت في قدرتنا على صناعة الفارق الرقمي
-      </p>
+          
+          <h3 className="text-xl font-bold text-green-400">
+            ملخص الإنجاز
+          </h3>
+          
+          <p className="text-gray-300 leading-relaxed text-lg italic">
+            "نجحنا من خلال هذه الاستراتيجية في تحويل التحديات إلى فرص حقيقية، وبناء تواجد رقمي فعال يركز على تحقيق نتائج ملموسة ونمو مستدام في المبيعات، بدلاً من مجرد التواجد الشكلي."
+          </p>
+        </div>
+      </motion.div>
     </div>
-
-    <motion.div
-      initial="hidden"
-      whileInView="show"
-      viewport={{ once: true }}
-      variants={{
-        hidden: { opacity: 0 },
-        show: {
-          opacity: 1,
-          transition: { staggerChildren: 0.1 },
-        },
-      }}
-      className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 md:gap-8"
-    >
-      {clients.map((client) => (
-        <motion.div
-          key={client.id}
-          variants={{
-            hidden: { opacity: 0, scale: 0.9, y: 20 },
-            show: { opacity: 1, scale: 1, y: 0 },
-          }}
-          whileHover={{ y: -8, scale: 1.05 }}
-          className="relative flex items-center justify-center p-8 rounded-2xl bg-white/[0.03] backdrop-blur-md border border-white/10 hover:border-green-500/40 transition-all duration-500 group cursor-pointer overflow-hidden shadow-xl"
-          onClick={() =>
-            client.website_url &&
-            window.open(client.website_url, "_blank", "noopener,noreferrer")
-          }
-        >
-          {/* Hover gradient */}
-          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-br from-green-500/10 via-transparent to-emerald-500/10 pointer-events-none" />
-
-          {client.client_logo ? (
-            <img
-              src={client.client_logo}
-              alt={client.client_name}
-              className="max-h-14 w-auto object-contain transition-all duration-500 grayscale group-hover:grayscale-0 group-hover:brightness-110"
-            />
-          ) : (
-            <span className="text-xs md:text-sm font-bold text-gray-500 group-hover:text-green-400 transition-all duration-500 text-center uppercase tracking-widest leading-tight">
-              {client.client_name}
-            </span>
-          )}
-        </motion.div>
-      ))}
-    </motion.div>
- </motion.section>
-)}
-
-      </div>
-    </main>
-  );
+  </main>
+);
 }
