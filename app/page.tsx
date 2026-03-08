@@ -1,3 +1,5 @@
+import type { Metadata } from 'next'; 
+
 "use client";
 
 import { useEffect, useRef, useState } from "react";
@@ -9,7 +11,6 @@ import Link from "next/link";
 import Image from "next/image";
 import AnimatedNumber from "@/app/components/AnimatedNumber";
 import { FaWhatsapp } from "react-icons/fa";
-
 
 /* ================= Types ================= */
 

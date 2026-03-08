@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'; 
 "use client";
 import AnimatedNumber from "@/app/components/AnimatedNumber";
 import { useEffect, useState } from "react";

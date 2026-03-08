@@ -9,9 +9,13 @@ const cairo = Cairo({
   variable: "--font-cairo",
 });
 
+// ✅ تعريف واحد فقط يجمع كل شيء
 export const metadata: Metadata = {
   title: "Social Culture",
   description: "شريكك الرقمي المتكامل",
+  icons: {
+    icon: "/logo.png",
+  },
 };
 
 export default function RootLayout({
