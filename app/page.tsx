@@ -444,7 +444,18 @@ const updatePackage = async () => {
 
 
   return (
-<main className="bg-black text-white min-h-screen px-4 py-6 md:p-10">
+<main className="text-white min-h-screen px-4 py-6 md:p-10 relative"
+  style={{
+    backgroundColor: '#030d07',
+    backgroundImage: `
+      linear-gradient(rgba(0,255,170,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,255,170,0.03) 1px, transparent 1px)
+    `,
+    backgroundSize: '50px 50px'
+  }}
+>
+
+
       <Toaster position="top-right" />
 
       {/* Header */}
@@ -490,53 +501,77 @@ const updatePackage = async () => {
 
 
       {/* About */}
-      <div className="absolute inset-0 -z-10 overflow-hidden">
-  <div className="absolute w-[500px] h-[500px] bg-green-500/10 rounded-full blur-3xl animate-pulse top-[-150px] right-[-150px]" />
-  <div className="absolute w-[400px] h-[400px] bg-emerald-400/10 rounded-full blur-3xl animate-pulse bottom-[-150px] left-[-150px]" />
+<div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
+  <div className="absolute w-[700px] h-[700px] bg-green-500/10 rounded-full blur-[120px] top-[-200px] right-[-200px] animate-pulse" />
+  <div className="absolute w-[500px] h-[500px] bg-emerald-400/10 rounded-full blur-[100px] bottom-[-100px] left-[-100px] animate-pulse" />
+  <div className="absolute w-[400px] h-[400px] bg-green-600/5 rounded-full blur-[80px] top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2" />
 </div>
-    <section className="relative text-center py-12 md:py-24">
 
-       <h2 className="text-3xl sm:text-5xl md:text-6xl font-bold text-green-400 mb-6">
+   <section className="relative text-center py-12 md:py-24">
+  <span className="inline-block bg-green-500/10 border border-green-500/30 text-green-400 text-sm font-semibold px-4 py-1.5 rounded-full mb-6">
+    🚀 وكالة التسويق الرقمي #1
+  </span>
+  <h2 className="text-3xl sm:text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-green-400 via-emerald-300 to-green-500 bg-clip-text text-transparent">
+    سوشيال كالتشر
+  </h2>
+  <p className="text-gray-400 max-w-2xl mx-auto text-lg leading-relaxed">
+    شريكك الرقمي المتكامل في إدارة الحضور الرقمي وزيادة المبيعات باحترافية.
+  </p>
+  <div className="flex gap-4 justify-center mt-8">
+    <a
+  href="#contact"
+  onClick={(e) => {
+    e.preventDefault();
+    document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+  }}
+  className="bg-green-500 text-black px-8 py-3 rounded-full font-bold hover:scale-105 transition shadow-[0_0_20px_rgba(0,255,170,0.3)]"
+>
+  ابدأ معنا الآن
+</a>
 
-          سوشيال كالتشر
-        </h2>
-        <p className="text-gray-400 max-w-2xl mx-auto">
-          شريكك الرقمي المتكامل في إدارة الحضور الرقمي
-          وزيادة المبيعات باحترافية.
-        </p>
-      </section>
+  <button
+  onClick={() => {
+    setActiveTab('packages');
+    setTimeout(() => {
+      document.getElementById('packages-section')?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+  }}
+  className="border border-green-500/40 text-green-400 px-8 py-3 rounded-full font-bold hover:bg-green-500/10 transition"
+>
+  شوف باقاتنا
+</button>
+  </div>
+</section>
 
       {/* Stats */}
-     <section className="py-16 text-center">
+   
+<section className="py-16 text-center">
   <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
-    <div className="bg-[#0c1f17] border border-green-500/20 rounded-2xl p-6">
-<div className="text-4xl font-bold text-green-400">
-  <AnimatedNumber value={120} />%+
-</div>      <div className="text-gray-400 mt-2">علامة تجارية ناجحة</div>
+<div className="bg-gradient-to-br from-[#0c1f17] to-[#071510] border border-green-500/20 rounded-2xl p-6 hover:border-green-400/50 hover:shadow-[0_0_30px_rgba(0,255,170,0.08)] transition-all duration-300 hover:-translate-y-1">
+      <div className="text-4xl mb-2">📈</div>
+      <div className="text-4xl font-bold text-green-400"><AnimatedNumber value={120} />%+</div>
+      <div className="text-gray-400 mt-2">علامة تجارية ناجحة</div>
     </div>
+    <div className="bg-gradient-to-br from-[#0c1f17] to-[#071510] border border-green-500/20 rounded-2xl p-6 hover:border-green-400/50 hover:shadow-[0_0_30px_rgba(0,255,170,0.08)] transition-all duration-300 hover:-translate-y-1">
 
-    <div className="bg-[#0c1f17] border border-green-500/20 rounded-2xl p-6">
-     <div className="text-4xl font-bold text-green-400">
-  <AnimatedNumber value={45} />%+
-</div>
+      <div className="text-4xl mb-2">💰</div>
+      <div className="text-4xl font-bold text-green-400"><AnimatedNumber value={45} />%+</div>
       <div className="text-gray-400 mt-2">نمو في المبيعات</div>
     </div>
-
-    <div className="bg-[#0c1f17] border border-green-500/20 rounded-2xl p-6">
-      <div className="text-4xl font-bold text-green-400">
-  <AnimatedNumber value={85} />%+
-</div>
+<div className="bg-gradient-to-br from-[#0c1f17] to-[#071510] border border-green-500/20 rounded-2xl p-6 hover:border-green-400/50 hover:shadow-[0_0_30px_rgba(0,255,170,0.08)] transition-all duration-300 hover:-translate-y-1">
+      <div className="text-4xl mb-2">🔥</div>
+      <div className="text-4xl font-bold text-green-400"><AnimatedNumber value={85} />%+</div>
       <div className="text-gray-400 mt-2">نمو التفاعل الرقمي</div>
     </div>
   </div>
 </section>
 
       {/* Services */}
-      <section className="mt-24">
+<section className="mt-24" id="packages-section">
         {/* ===== Tabs Header ===== */}
  {/* Tabs Header */}
 <div className="flex justify-center mb-10">
-  <div className="bg-[#0c1f17] p-2 rounded-full flex gap-2 w-full max-w-xl shadow-[0_0_20px_rgba(0,255,170,0.1)] border border-green-500/20">
+<div className="bg-gradient-to-r from-[#0c1f17] to-[#071510] p-2 rounded-full flex gap-2 w-full max-w-xl border border-green-500/20 shadow-[0_0_30px_rgba(0,255,170,0.05)]">
     <button 
       onClick={() => setActiveTab('services')} 
       className={`flex-1 py-3 rounded-full font-bold transition-all duration-300 text-sm md:text-base ${
@@ -606,7 +641,7 @@ hover:scale-[1.02]
 ${
   service.featured
     ? "bg-[#102d21] border-2 border-yellow-400 shadow-2xl scale-105"
-    : "bg-[#0c1f17] border border-green-500/20"
+   : "bg-gradient-to-br from-[#0c1f17] to-[#071510] border border-green-500/20 hover:border-green-400/40"
 }`}
                   >
 
@@ -711,7 +746,7 @@ ${
                   className={`px-5 py-2 rounded-full text-sm font-semibold transition-all duration-300 ${
                     selectedCategory === cat
                       ? 'bg-green-500 text-black shadow-[0_0_15px_rgba(0,255,170,0.4)]'
-                      : 'bg-[#0c1f17] text-gray-400 border border-green-500/20 hover:text-green-400 hover:border-green-500/50'
+:"bg-gradient-to-br from-[#0c1f17] to-[#071510] border border-green-500/20 rounded-2xl p-6 hover:border-green-400/50 hover:shadow-[0_0_30px_rgba(0,255,170,0.08)] transition-all duration-300"
                   }`}
                 >
                   {cat}
@@ -919,9 +954,21 @@ ${
                       </div>
                     ) : (
                       <div className="mt-auto">
-                        <Link href="#contact" className={`block w-full py-4 rounded-xl text-center font-bold transition-all duration-300 ${isMiddle ? 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-black hover:scale-105 shadow-lg' : 'bg-green-500/10 text-green-400 border border-green-500/30 hover:bg-green-500 hover:text-black'}`}>
-                          اطلب الباقة الآن
-                        </Link>
+                      <a
+  href="#contact"
+  onClick={(e) => {
+    e.preventDefault();
+    document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+  }}
+  className={`block w-full py-4 rounded-xl text-center font-bold transition-all duration-300 ${
+    isMiddle
+      ? 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-black hover:scale-105 shadow-[0_0_20px_rgba(250,204,21,0.3)]'
+      : 'bg-green-500/10 text-green-400 border border-green-500/30 hover:bg-green-500 hover:text-black'
+  }`}
+>
+  {isMiddle ? '⭐ اطلب الباقة الآن' : 'اطلب الباقة'}
+</a>
+
                       </div>
                     )}
                   </div>
@@ -1038,10 +1085,7 @@ ${
 
  
   
-    <section
-      id="contact"
-      className="relative py-24 bg-black overflow-hidden"
-    >
+<section id="contact" className="relative py-24 bg-gradient-to-b from-[#030d07] via-[#051209] to-black overflow-hidden">
       {/* subtle background glow */}
       <div className="absolute inset-0 -z-10 flex justify-center">
         <div className="w-[500px] h-[500px] bg-emerald-500/10 rounded-full blur-3xl" />
