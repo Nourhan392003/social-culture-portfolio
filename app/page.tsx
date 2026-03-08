@@ -379,7 +379,10 @@ const updateClient = async () => {
   setEditingClient(null);
   loadClients();
 };
-  if (loading) return <div className="text-white p-10">Loading...</div>;
+  if (loading) return <div className="fixed inset-0 flex items-center justify-center bg-black z-50">
+  <p className="text-white text-xl">...Loading</p>
+</div>
+;
   const addClient = async () => {
   await supabase.from("clients").insert({
     name,
