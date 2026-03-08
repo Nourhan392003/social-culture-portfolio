@@ -616,9 +616,9 @@ const updatePackage = async () => {
   transition={{ duration: 0.5, ease: "easeOut" }}
 >
           {/* ================= Services ================= */}
-          {activeTab === "services" && (
-            <div>
-         const updatePackage     {user && (
+         {activeTab === "services" && (
+  <div>
+    {user && (
                 <div className="flex justify-between items-center mb-8">
                   <h2 className="text-3xl font-bold text-green-400">
                     خدماتنا
