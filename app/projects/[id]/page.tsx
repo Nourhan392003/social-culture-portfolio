@@ -1,5 +1,6 @@
-import type { Metadata } from 'next'; 
+
 "use client";
+import type { Metadata } from 'next'; 
 import AnimatedNumber from "@/app/components/AnimatedNumber";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
