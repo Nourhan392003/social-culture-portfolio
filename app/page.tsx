@@ -665,9 +665,6 @@ ${
 )}
 
 
-
-            
-
             <h3 className="text-xl font-bold text-green-400 mb-3">
               {service.title}
             </h3>
