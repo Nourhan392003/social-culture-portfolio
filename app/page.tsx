@@ -1,6 +1,5 @@
 
 "use client";
-import type { Metadata } from 'next'; 
 import { useEffect, useRef, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";

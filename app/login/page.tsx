@@ -1,10 +1,9 @@
 
 'use client'
-import type { Metadata } from 'next'; 
-import toast from 'react-hot-toast'
 
 import { useState } from 'react'
 import { createClient } from '@supabase/supabase-js'
+import toast from 'react-hot-toast'
 
 const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
