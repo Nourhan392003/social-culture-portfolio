@@ -513,13 +513,13 @@ const updatePackage = async () => {
   <span className="inline-block bg-green-500/10 border border-green-500/30 text-green-400 text-sm font-semibold px-4 py-1.5 rounded-full mb-6">
     🚀 وكالة التسويق الرقمي #1
   </span>
- <h2 className="text-4xl sm:text-5xl md:text-7xl font-extrabold mb-6 
-  bg-gradient-to-br from-green-300 via-emerald-400 to-green-600 
-  bg-clip-text text-transparent 
-  drop-shadow-[0_0_15px_rgba(52,211,153,0.3)] 
-  tracking-tight">
+ <h2 className="text-4xl sm:text-5xl md:text-7xl font-bold mb-6 
+  text-green-400 
+  [text-shadow:_0_0_10px_rgb(74_222_128_/_50%),_0_0_20px_rgb(74_222_128_/_30%)] 
+  tracking-widest">
   سوشيال كالتشر
 </h2>
+
 
   <p className="text-gray-400 max-w-2xl mx-auto text-lg leading-relaxed">
     شريكك الرقمي المتكامل في إدارة الحضور الرقمي وزيادة المبيعات باحترافية.
